@@ -5,18 +5,20 @@ using UnityEngine;
 public class Hacker : MonoBehaviour {
 
 	int Level;
+	string Password = "pizza";
+	string[] Passwords = { "pizza", "teeth", "goat", "dinosaur", "fantasy", "existence" };
 	enum Screen { MainMenu, Password, Win };
 	Screen CurrentScreen = Screen.MainMenu;
 
 	// Use this for initialization
 	void Start () {
-		ShowMainMenu("Welcome to Hack0r 2017.");
+		Terminal.WriteLine("Welcome to Hack0r 2017.");
+		AskForPassword();
 	}
 	
-	void ShowMainMenu(string greeting) {
+	void AskForPassword() {
 		CurrentScreen = Screen.MainMenu;
 		Terminal.ClearScreen();
-        Terminal.WriteLine(greeting);
         Terminal.WriteLine("WHAT WOULD YOU LIKE TO HACK?");
         Terminal.WriteLine("Press 1 for your kindergarten teacher's email");
         Terminal.WriteLine("Press 2 for the president's email");
@@ -26,31 +28,80 @@ public class Hacker : MonoBehaviour {
 
 	void OnUserInput(string input) {
 		if (input == "menu") {
-			ShowMainMenu("Welcome to Hack0r 2017.");
+			AskForPassword();
 		}
 		else if (CurrentScreen == Screen.MainMenu) {
 			RunMainMenu(input);
 		}
+		else if (CurrentScreen == Screen.Password) {
+			CheckPassword(input);
+		}
 	}
 
 	void RunMainMenu(string input) {
-		if (input == "1") {
-            Level = 1;
-            StartGame();
-        }
-        else if (input == "2") {
-            Level = 2;
-            StartGame();
-        }
+		bool isValidLevel = (input == "1" | input == "2");
+		
+		if (isValidLevel) {
+			Level = int.Parse(input);
+			StartGame();
+		}
         else {
             Terminal.WriteLine("Please enter a valid level");
         }
 	}
 
+	void CheckPassword(string input) {
+		if (input == Password) {
+			Win();
+		}
+		else {
+			TryAgain();
+		}
+	}
+
+	void Win() {
+		CurrentScreen = Screen.Win;
+		Terminal.ClearScreen();
+		ShowLevelReward();
+	}
+
+	void ShowLevelReward() {
+		if (Level == 1) {
+			Terminal.WriteLine("You beat level 1! You win! Type 'menu' to play again!");
+		}
+		else {
+			Terminal.WriteLine("You beat level 2! You win! Type 'menu' to play again!");
+		}
+	}
+
+	void TryAgain() {
+		Terminal.WriteLine("Wrong. Try again.");
+	}
+
 	void StartGame() {
 		CurrentScreen = Screen.Password;
-		Terminal.WriteLine("You have chosen level " + Level);
-		Terminal.WriteLine("Please enter your password: ");
+
+		GeneratePassword();
+
+		Terminal.ClearScreen();
+		Terminal.WriteLine("Please enter your password: hint: " + Password.Anagram());
+	}
+
+	void GeneratePassword() {
+		if (Level == 1)
+        {
+            Password = Passwords[Random.Range(0, 3)];
+            print(Password);
+        }
+        else if (Level == 2)
+        {
+            Password = Passwords[Random.Range(3, Passwords.Length)];
+            print(Password);
+        }
+        else
+        {
+            Debug.LogError("Invalid level number");
+        }
 	}
 
 	// Update is called once per frame
